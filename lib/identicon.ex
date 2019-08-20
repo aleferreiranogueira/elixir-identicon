@@ -1,6 +1,21 @@
 defmodule Identicon do
   def main(input) do
-    input |> hash_string
+    input |> hash_string |> seed_image |> define_color
+  end
+
+  def define_color(%Identicon.Image{color: [r, g, b | _tail]} = image) do
+    %Identicon.Image{image | color: {r, g, b}}
+  end
+
+  @doc """
+  Puts a `hex_list` inside a seed struct in the Image module
+
+  ## Examples
+      iex> Identicon.seed_image([1,2])
+      %Identicon.Image{seed: [1,2]}
+  """
+  def seed_image(hex_list) do
+    %Identicon.Image{seed: hex_list}
   end
 
   @doc """
