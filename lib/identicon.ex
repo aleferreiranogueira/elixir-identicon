@@ -5,6 +5,23 @@ defmodule Identicon do
     |> define_color
     |> build_grid
     |> build_pixel_map
+    |> generate_image
+    |> save_image(input)
+  end
+
+  def save_image(file, input) do
+    File.write("#{input}.png", file)
+  end
+
+  def generate_image(%Identicon.Image{pixel_map: pixel_map, color: color}) do
+    file = :egd.create(250, 250)
+    fill = :egd.color(color)
+
+    Enum.each(pixel_map, fn {x, y} ->
+      :egd.filledRectangle(file, {x, y}, {x + 50, y + 50}, fill)
+    end)
+
+    :egd.render(file)
   end
 
   def build_pixel_map(%Identicon.Image{grid: grid} = image) do
