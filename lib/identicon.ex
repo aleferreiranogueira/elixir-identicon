@@ -3,7 +3,7 @@ defmodule Identicon do
     input |> hash_string |> seed_image |> define_color
   end
 
-  def define_color(%Identicon.Image{color: [r, g, b | _tail]} = image) do
+  def define_color(%Identicon.Image{seed: [r, g, b | _tail]} = image) do
     %Identicon.Image{image | color: {r, g, b}}
   end
 
