@@ -1,4 +1,5 @@
 defmodule Identicon do
+  @spec main(String.t()) :: :ok | {:error, atom}
   def main(input) do
     input
     |> hash_string
@@ -9,10 +10,12 @@ defmodule Identicon do
     |> save_image(input)
   end
 
+  @spec save_image(binary, String.t()) :: :ok | {:error, atom}
   def save_image(file, input) do
     File.write("#{input}.png", file)
   end
 
+  @spec generate_image(Identicon.Image.t()) :: binary
   def generate_image(%Identicon.Image{pixel_map: pixel_map, color: color}) do
     file = :egd.create(250, 250)
     fill = :egd.color(color)
@@ -36,6 +39,7 @@ defmodule Identicon do
     %Identicon.Image{image | pixel_map: pixel_map}
   end
 
+  @spec build_grid(%Identicon.Image{}) :: %Identicon.Image{}
   def build_grid(%Identicon.Image{seed: seed} = image) do
     incomplete_rows = Enum.chunk_every(seed, 3)
 
@@ -58,6 +62,7 @@ defmodule Identicon do
       %Identicon.Image{seed: [26, 121, 164, 214, 13, 230, 113, 142, 142, 91, 50, 110, 51, 138, 229, 51]color: {26, 121, 164}}
 
   """
+  @spec define_color(%Identicon.Image{seed: list}) :: %Identicon.Image{seed: list, color: tuple}
   def define_color(%Identicon.Image{seed: [r, g, b | _tail]} = image) do
     %Identicon.Image{image | color: {r, g, b}}
   end
@@ -71,7 +76,7 @@ defmodule Identicon do
       %Identicon.Image{seed: [26, 121, 164, 214, 13, 230, 113, 142, 142, 91, 50, 110, 51, 138, 229, 51]}
 
   """
-  @spec hash_string(String.t()) :: struct
+  @spec hash_string(String.t()) :: %Identicon.Image{seed: list}
   def hash_string(input) do
     hex_list =
       :crypto.hash(:md5, input)
