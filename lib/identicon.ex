@@ -10,12 +10,23 @@ defmodule Identicon do
     |> save_image(input)
   end
 
+  @doc """
+  Persists a binary Identicon to disk
+
+  ## Examples
+      iex> Identicon.hash_string("xpto") |> Identicon.define_color |> Identicon.build_grid |> Identicon.build_pixel_map |> Identicon.generate_image |> Identicon.save_image("xpto")
+      :ok
+
+  """
   @spec save_image(binary, String.t()) :: :ok | {:error, atom}
   def save_image(file, input) do
     File.write("#{input}.png", file)
   end
 
-  @spec generate_image(Identicon.Image.t()) :: binary
+  @doc """
+  Generates a Identicon image and returns the binary
+  """
+  @spec generate_image(%Identicon.Image{}) :: binary
   def generate_image(%Identicon.Image{pixel_map: pixel_map, color: color}) do
     file = :egd.create(250, 250)
     fill = :egd.color(color)
@@ -27,6 +38,19 @@ defmodule Identicon do
     :egd.render(file)
   end
 
+  @doc """
+  Returns a `pixel_map` struct representing x and y values to be drawn in the image.
+
+  ## Examples
+
+      %Identicon.Image{
+      color: {56, 81, 177},
+      grid: [{56, 0},{56, 4},{174, 5},{202, 7},{174, 9},{12, 10},{166, 11},{166, 13},{12, 14},{194, 15},{74, 16},{2, 17},{74, 18},{194, 19},{86, 20},{168, 21},{10, 22},{168, 23},{86, 24}],
+      pixel_map: [{0, 0},{200, 0},{0, 50},{100, 50},{200, 50},{0, 100},{50, 100},{150, 100},{200, 100},{0, 150},{50, 150},{100, 150},{150, 150},{200, 150},{0, 200},{50, 200},{100, 200},{150, 200},{200, 200}],
+      seed: [56, 81, 177, 174, 115, 202, 12, 166, 227, 194, 74, 2, 86, 168, 10, 206]
+      }
+  """
+  @spec build_pixel_map(%Identicon.Image{}) :: %Identicon.Image{}
   def build_pixel_map(%Identicon.Image{grid: grid} = image) do
     pixel_map =
       Enum.map(grid, fn {_value, index} ->
@@ -39,6 +63,20 @@ defmodule Identicon do
     %Identicon.Image{image | pixel_map: pixel_map}
   end
 
+  @doc """
+  Generates a grid struct with only the even values in a tuple with it's index
+
+  ## Examples
+
+      iex> Identicon.hash_string("xpto") |> Identicon.define_color |> Identicon.build_grid
+      %Identicon.Image{
+        color: {56, 81, 177},
+        grid: [{56, 0},{56, 4},{174, 5},{202, 7},{174, 9},{12, 10},{166, 11},{166, 13},{12, 14},{194, 15},{74, 16},{2, 17},{74, 18},{194, 19},{86, 20},{168, 21},{10, 22},{168, 23},{86, 24}],
+        pixel_map: nil,
+        seed: [56, 81, 177, 174, 115, 202, 12, 166, 227, 194, 74, 2, 86, 168, 10, 206]
+      }
+
+  """
   @spec build_grid(%Identicon.Image{}) :: %Identicon.Image{}
   def build_grid(%Identicon.Image{seed: seed} = image) do
     incomplete_rows = Enum.chunk_every(seed, 3)
@@ -59,7 +97,8 @@ defmodule Identicon do
   ## Examples
 
       iex> Identicon.define_color(%Identicon.Image{seed: [26, 121, 164, 214, 13, 230, 113, 142, 142, 91, 50, 110, 51, 138, 229, 51]})
-      %Identicon.Image{seed: [26, 121, 164, 214, 13, 230, 113, 142, 142, 91, 50, 110, 51, 138, 229, 51]color: {26, 121, 164}}
+      %Identicon.Image{seed: [26, 121, 164, 214, 13, 230, 113, 142, 142, 91, 50, 110, 51, 138, 229, 51],
+      color: {26, 121, 164}}
 
   """
   @spec define_color(%Identicon.Image{seed: list}) :: %Identicon.Image{seed: list, color: tuple}
